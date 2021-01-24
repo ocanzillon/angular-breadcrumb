@@ -1,16 +1,16 @@
 ---
-title: "Breadcrumb in an Angular application"
-description: "Show a hierarchical breadcrumb in an Angular application"
+title: 'Breadcrumb in an Angular application'
+description: 'Show a hierarchical breadcrumb in an Angular application'
 date: 2021-01-24T21:45:48+00:00
 author: Olivier Canzillon
-main-class: "angular"
+main-class: 'angular'
 permalink: /angular-breadcrumb
 categories:
   - Angular
 tags:
   - Angular
 
-introduction: "Show a hierarchical breadcrumb in an Angular application configured in the route definition"
+introduction: 'Show a hierarchical breadcrumb in an Angular application configured in the route definition'
 ---
 
 # Angular Breadcrumb application
@@ -36,15 +36,15 @@ The breadcrumb is hierarchical if the route has some parent-children relationshi
 
 ```typescript
 const routes: Routes = [
-  { path: "", redirectTo: "/home", pathMatch: "full" },
-  { path: "home", component: HomeComponent, data: { breadcrumb: "Home" } },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent, data: { breadcrumb: 'Home' } },
   {
-    path: "users",
+    path: 'users',
     component: UserListComponent,
-    data: { breadcrumb: "Users" }, // hardcoded string
+    data: { breadcrumb: 'Users' }, // hardcoded string
     children: [
       {
-        path: ":id",
+        path: ':id',
         component: UserComponent,
         data: { breadcrumb: (data: any) => `${data.user.name}` }, // dynamic
         resolve: { user: UserResolverService }, // resolver to retrieve the object used in the breadcrumb construction
@@ -62,7 +62,7 @@ The result is an array of `Breadcrumb` elements exposed as an Observable.
 
 ```typescript
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class BreadcrumbService {
   // Subject emitting the breadcrumb hierarchy
@@ -107,7 +107,7 @@ export class BreadcrumbService {
 
   private getLabel(data: Data) {
     // The breadcrumb can be defined as a static string or as a function to construct the breadcrumb element out of the route data
-    return typeof data.breadcrumb === "function"
+    return typeof data.breadcrumb === 'function'
       ? data.breadcrumb(data)
       : data.breadcrumb;
   }
@@ -120,9 +120,9 @@ The component subscribes to the Observable exposed by the service and displays t
 
 ```typescript
 @Component({
-  selector: "app-breadcrumb",
-  templateUrl: "./breadcrumb.component.html",
-  styleUrls: ["./breadcrumb.component.scss"],
+  selector: 'app-breadcrumb',
+  templateUrl: './breadcrumb.component.html',
+  styleUrls: ['./breadcrumb.component.scss'],
 })
 export class BreadcrumbComponent {
   breadcrumbs$: Observable<Breadcrumb[]>;
