@@ -1,0 +1,7 @@
+.user {
+  margin: 1em;
+  padding: 1em;
+  display: inline-block;
+  border: solid 1px #4caf50;
+  border-radius: 2px;
+}
