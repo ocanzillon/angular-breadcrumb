@@ -1,3 +1,5 @@
 <ul>
-  <li *ngFor="let breadcrumb of (breadcrumbs$ | async)">{{ breadcrumb.label }}</li>
+  <li *ngFor="let breadcrumb of (breadcrumbs$ | async)">
+    <a [href]="breadcrumb.url">{{ breadcrumb.label }}</a>
+  </li>
 </ul>

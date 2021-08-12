@@ -10,7 +10,7 @@ categories:
 tags:
   - Angular
 
-introduction: 'Show a hierarchical breadcrumb in an Angular application configured in the route definition'
+introduction: 'Show a hierarchical and dynamic breadcrumb in an Angular application configured in the route definition'
 ---
 
 # Angular Breadcrumb application
@@ -56,15 +56,16 @@ const routes: Routes = [
 
 ## Service
 
-The service subscribes to the router events (of type NavigationEnd) and constructs the breadcrumb hierarchy from the activated route, by following the route tree. For each node, a breadcrumb part is retrieved (either the hardcoded string, either the application of the function to the `data` object).
+The service subscribes to the router events (of type NavigationEnd) and constructs the breadcrumb hierarchy from the activated route, by following the route tree. For each node, a breadcrumb part is retrieved (either the hardcoded string, either the application of the function to the `data` object) and the URL of the page is constructed.
 
 The result is an array of `Breadcrumb` elements exposed as an Observable.
 
 ```typescript
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class BreadcrumbService {
+
   // Subject emitting the breadcrumb hierarchy
   private readonly _breadcrumbs$ = new BehaviorSubject<Breadcrumb[]>([]);
 
@@ -72,45 +73,44 @@ export class BreadcrumbService {
   readonly breadcrumbs$ = this._breadcrumbs$.asObservable();
 
   constructor(private router: Router) {
-    this.router.events
-      .pipe(
-        // Filter the NavigationEnd events as the breadcrumb is updated only when the route reaches its end
-        filter((event) => event instanceof NavigationEnd)
-      )
-      .subscribe((event) => {
-        // Construct the breadcrumb hierarchy
-        const root = this.router.routerState.snapshot.root;
-        const breadcrumbs: Breadcrumb[] = [];
-        this.addBreadcrumb(root, breadcrumbs);
+    this.router.events.pipe(
+      // Filter the NavigationEnd events as the breadcrumb is updated only when the route reaches its end
+      filter((event) => event instanceof NavigationEnd)
+    ).subscribe(event => {
+      // Construct the breadcrumb hierarchy
+      const root = this.router.routerState.snapshot.root;
+      const breadcrumbs: Breadcrumb[] = [];
+      this.addBreadcrumb(root, [], breadcrumbs);
 
-        // Emit the new hierarchy
-        this._breadcrumbs$.next(breadcrumbs);
-      });
+      // Emit the new hierarchy
+      this._breadcrumbs$.next(breadcrumbs);
+    });
   }
 
-  private addBreadcrumb(
-    route: ActivatedRouteSnapshot,
-    breadcrumbs: Breadcrumb[]
-  ) {
+  private addBreadcrumb(route: ActivatedRouteSnapshot, parentUrl: string[], breadcrumbs: Breadcrumb[]) {
     if (route) {
+      // Construct the route URL
+      const routeUrl = parentUrl.concat(route.url.map(url => url.path));
+
       // Add an element for the current route part
       if (route.data.breadcrumb) {
         const breadcrumb = {
           label: this.getLabel(route.data),
+          url: '/' + routeUrl.join('/')
         };
         breadcrumbs.push(breadcrumb);
       }
+
       // Add another element for the next route part
-      this.addBreadcrumb(route.firstChild, breadcrumbs);
+      this.addBreadcrumb(route.firstChild, routeUrl, breadcrumbs);
     }
   }
 
   private getLabel(data: Data) {
     // The breadcrumb can be defined as a static string or as a function to construct the breadcrumb element out of the route data
-    return typeof data.breadcrumb === 'function'
-      ? data.breadcrumb(data)
-      : data.breadcrumb;
+    return typeof data.breadcrumb === 'function' ? data.breadcrumb(data) : data.breadcrumb;
   }
+
 }
 ```
 
@@ -138,7 +138,7 @@ This implementation of the HTML part is really simple and can be customized with
 ```html
 <ul>
   <li *ngFor="let breadcrumb of (breadcrumbs$ | async)">
-    {{ breadcrumb.label }}
+    <a [href]="breadcrumb.url">{{ breadcrumb.label }}</a>
   </li>
 </ul>
 ```
