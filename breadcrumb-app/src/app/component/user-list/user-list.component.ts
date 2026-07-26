@@ -1,22 +1,27 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
+import { Component, inject, signal } from '@angular/core';
+import { RouterModule } from "@angular/router";
+import { take } from "rxjs";
 import { User } from '../../model/user.model';
+import { UserService } from "../../service/user.service";
 
 
 @Component({
   selector: 'app-user-list',
+  imports: [
+    RouterModule
+  ],
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrl: './user-list.component.scss'
 })
-export class UserListComponent implements OnInit {
+export class UserListComponent {
 
-  users: User[] = [];
+  private readonly userService = inject(UserService);
+  users = signal<User[]>([]);
 
-  constructor(private readonly http: HttpClient) { }
-
-  ngOnInit(): void {
-    this.http.get<User[]>(`https://jsonplaceholder.typicode.com/users`).subscribe(users => this.users = users);
+  constructor() {
+    this.userService.getUsers()
+      .pipe(take(1))
+      .subscribe(this.users.set);
   }
 
 }
